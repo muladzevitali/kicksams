@@ -1,0 +1,16 @@
+[
+  {
+    "model": "locations.Country",
+    "pk": 2,
+    "fields": {
+      "name": "United Arab Emirates"
+    }
+  },
+  {
+    "model": "locations.Country",
+    "pk": 1,
+    "fields": {
+      "name": "Netherland"
+    }
+  }
+]

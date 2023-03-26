@@ -1,0 +1,16 @@
+[
+  {
+    "model": "locations.City",
+    "fields": {
+      "country": 2,
+      "city": 1
+    }
+  },
+  {
+    "model": "locations.City",
+    "fields": {
+      "country": 2,
+      "city": 2
+    }
+  }
+]
