@@ -1,0 +1,65 @@
+version: '3.9'
+x-app: &base-api
+  build:
+    context: 'api'
+  depends_on:
+    - "postgres"
+    - "redis"
+  env_file:
+    - .env
+  restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+  stop_grace_period: "3s"
+  tty: true
+
+services:
+  api:
+    <<: *base-api
+    container_name: kicksams_api
+    entrypoint: [ '/app-entrypoint.sh' ]
+    healthcheck:
+      test: "${DOCKER_WEB_HEALTHCHECK_TEST:-curl localhost:8001/check_health/}"
+      interval: "60s"
+      timeout: "3s"
+      retries: 3
+    ports:
+      - "8001:8001"
+
+  worker:
+    <<: *base-api
+    container_name: kicksams_celery
+    entrypoint: [ '/celery-entrypoint.sh' ]
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: kicksams_postgres
+    logging:
+      driver: none
+    env_file:
+      - .env
+    volumes:
+      - data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  redis:
+    build: ./redis
+    container_name: kicksams_redis
+    logging:
+      driver: none
+    volumes:
+      - ./redis/backup:/data
+    ports:
+      - "6379:6379"
+
+  nginx:
+    build: ./nginx
+    container_name: kicksams_nginx
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+    restart: "on-failure"
+
+volumes:
+  data:
+    external: true
+    name: kicksams-data
