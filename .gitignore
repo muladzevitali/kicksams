@@ -131,3 +131,5 @@ dmypy.json
 .env.dev
 migrations/
 static/
+
+redis/backup/*
