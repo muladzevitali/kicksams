@@ -38,32 +38,32 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      steps:
-        - name: checkout
-          uses: actions/checkout@v2
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
 
-        - name: python 3.9
-          uses: actions/setup-python@v2     
-          with:
-            python-version: 3.9
-        - name: Update apps
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y build-essential curl libpq-dev --no-install-recommends
+      - name: python 3.9
+        uses: actions/setup-python@v2     
+        with:
+          python-version: 3.9
+      - name: Update apps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl libpq-dev --no-install-recommends
+      
+      -name: CD into api
+        run: |
+          cd api
+          
+      - name: Install dependencies
+          python -m pip install -U pip
+          pip install -r requirements.txt
 
-        - name: Install dependencies
-            python -m pip install -U pip
-            pip install -r requirements.txt
+      - name: Migrate
+        run: |
+          python manage.py makemigrations
+          python manage.py migrate
 
-        -name: CD into api
-          run: |
-            cd api
-
-        - name: Migrate
-          run: |
-            python manage.py makemigrations
-            python manage.py migrate
-
-        - name: Test
-          run: |
-            python manage.py test
+      - name: Test
+        run: |
+          python manage.py test
