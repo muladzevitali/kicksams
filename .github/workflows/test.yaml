@@ -51,25 +51,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential curl libpq-dev --no-install-recommends
-      
-      - name: CD into api
-        run: |
-          pwd
-          cd api
           
       - name: Install dependencies
         run: |
-          pwd
           cd api
           python -m pip install -U pip
           pip install -r requirements.txt
 
       - name: Migrate
         run: |
-          pwd
+          cd api
           python manage.py makemigrations
           python manage.py migrate
 
       - name: Test
         run: |
+          cd api
           python manage.py test
