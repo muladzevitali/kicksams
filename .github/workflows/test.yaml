@@ -1,0 +1,65 @@
+name: test-api
+
+on:
+  push:
+    branches: [main, windows-set-up]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE_PROJECT_NAME: kicksams
+      DOCKER_RESTART_POLICY: no
+      PYTHONDONTWRITEBYTECODE: true
+      PYTHONUNBUFFERED: true
+
+      DJANGO_DEBUG: True
+      DJANGO_SECRET_KEY: some-secret-key
+      DJANGO_ALLOWED_HOSTS: 'localhost,kicksams.com'
+
+      CELERY_LOG_LEVEL: info
+
+      # POSTGRES_USER: django_app
+      # POSTGRES_PASSWORD: very-secret
+      # POSTGRES_DB: kicksams_db
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: django_app
+          POSTGRES_PASSWORD: very-secret
+          POSTGRES_DB: kicksams_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      
+      - name: install dependencies
+        run: |
+          apt-get update
+          apt-get install -y build-essential curl libpq-dev --no-install-recommends
+          python -m pip install --U pip
+          pip install -r api/requirements.txt
+      
+      - name: Migrate
+        run: |
+          cd api
+          python manage.py makemigrations
+          python manage.py migrate
+      - name: Test
+        run: |
+          python manage.py test
+
+
